@@ -1,0 +1,58 @@
+version: "3.9"
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./mysql/data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL","mysqladmin ping -h localhost -u${MYSQL_USER} -p${MYSQL_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports: [ "3306:3306" ]
+
+  mongo:
+    image: mongo:7
+    volumes:
+      - ./mongo/data:/data/db
+    ports: [ "27017:27017" ]
+
+  auth:
+    build: ./services/auth
+    env_file:
+      - ./.env
+      - ./services/auth/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports: [ "3000:3000" ]
+
+  enter:
+    build: ./services/enter
+    env_file:
+      - ./.env
+      - ./services/enter/.env
+    depends_on: [ auth, mysql ]
+    ports: [ "3001:3001" ]
+
+  analytics:
+    build: ./services/analytics
+    env_file:
+      - ./.env
+      - ./services/analytics/.env
+    depends_on: [ mysql, mongo ]
+    ports: [ "8000:8000" ]
+
+  show:
+    build: ./services/show
+    env_file:
+      - ./.env
+      - ./services/show/.env
+    depends_on: [ analytics, mongo, auth ]
+    ports: [ "3002:3002" ]
