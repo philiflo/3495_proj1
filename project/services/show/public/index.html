@@ -1,0 +1,18 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Show Results</title>
+<style>body{font:16px system-ui;max-width:900px;margin:40px auto}input,button{font:inherit;padding:.5rem;margin:.25rem 0}input{width:100%}pre{background:#111;color:#eee;padding:1rem;border-radius:.5rem}table{border-collapse:collapse;margin-top:1rem}td,th{border:1px solid #ccc;padding:.4rem .6rem}</style>
+<h1>Show Results</h1>
+<label>JWT</label><input id="t" placeholder="paste JWT here"><button id="clip">Paste from clipboard</button>
+<div>
+  <button id="load">Load Stats</button>
+  <button id="recomp">Recompute</button>
+</div>
+<div id="table"></div>
+<pre id="out">(no response yet)</pre>
+<script>
+const $=s=>document.querySelector(s), out=$("#out"), tbl=$("#table");
+$("#clip").onclick=async()=>{$("#t").value=await navigator.clipboard.readText().catch(()=> "")||"";}
+$("#recomp").onclick=async()=>{const r=await fetch("/recompute",{method:"POST"}); out.textContent=`HTTP ${r.status}\n`+await r.text();}
+$("#load").onclick=async()=>{const r=await fetch("/stats",{headers:{Authorization:"Bearer "+$("#t").value.trim()}}); const txt=await r.text(); out.textContent=`HTTP ${r.status}\n`+txt; try{const j=JSON.parse(txt); tbl.innerHTML=`<table><tr><th>min</th><th>max</th><th>avg</th><th>count</th><th>computed_at</th></tr><tr><td>${j.min??""}</td><td>${j.max??""}</td><td>${j.avg??""}</td><td>${j.count??""}</td><td>${j.computed_at??""}</td></tr></table>`;}catch{}}
+</script>

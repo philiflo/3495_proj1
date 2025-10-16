@@ -1,0 +1,15 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Enter Data</title>
+<style>body{font:16px system-ui;max-width:720px;margin:40px auto}input,button{font:inherit;padding:.5rem;margin:.25rem 0}input{width:100%}pre{background:#111;color:#eee;padding:1rem;border-radius:.5rem}</style>
+<h1>Enter Data</h1>
+<label>JWT</label><input id="t" placeholder="paste JWT here (or from clipboard)">
+<button id="clip">Paste from clipboard</button>
+<label>Value</label><input id="v" type="number" placeholder="e.g., 42">
+<button id="go">Submit</button>
+<pre id="out">(no response yet)</pre>
+<script>
+const $=s=>document.querySelector(s), out=$("#out");
+$("#clip").onclick=async()=>{$("#t").value=await navigator.clipboard.readText().catch(()=> "")||"";}
+$("#go").onclick=async()=>{const r=await fetch("/entries",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+$("#t").value.trim()},body:JSON.stringify({value:Number($("#v").value)})}); out.textContent=`HTTP ${r.status}\n`+await r.text();}
+</script>

@@ -1,8 +1,9 @@
 FROM node:20-alpine
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi
+COPY package.json ./
+RUN npm install --omit=dev
 COPY src ./src
+COPY public ./public
 COPY .env .env
 EXPOSE 3002
 CMD ["npm","start"]

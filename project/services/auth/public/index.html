@@ -1,0 +1,18 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Auth — Register/Login</title>
+<style>body{font:16px system-ui;max-width:720px;margin:40px auto}input,button{font:inherit;padding:.5rem;margin:.25rem 0}input{width:100%}pre{background:#111;color:#eee;padding:1rem;border-radius:.5rem}</style>
+<h1>Auth</h1>
+<label>Email</label><input id="e" placeholder="me@example.com">
+<label>Password</label><input id="p" type="password" placeholder="secret">
+<button id="reg">Register</button>
+<button id="log">Login</button>
+<button id="copy">Copy JWT</button>
+<pre id="out">(no response yet)</pre>
+<script>
+const $=s=>document.querySelector(s), out=$("#out");
+async function post(url, body){const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}); out.textContent=`HTTP ${r.status}\n`+await r.text();}
+$("#reg").onclick=()=>post("/register",{email:$("#e").value,password:$("#p").value});
+$("#log").onclick=async()=>{const r=await fetch("/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("#e").value,password:$("#p").value})}); const t=await r.text(); out.textContent=`HTTP ${r.status}\n`+t; try{const tok=JSON.parse(t).token; if(tok) localStorage.setItem("jwt",tok);}catch{}};
+$("#copy").onclick=async()=>{const t=localStorage.getItem("jwt")||""; if(!t) return alert("No JWT yet. Click Login."); await navigator.clipboard.writeText(t); alert("JWT copied!");}
+</script>
