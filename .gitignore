@@ -1,0 +1,11 @@
+# env files
+project/.env
+project/services/**/.env
+
+# db volumes
+project/mysql/data/
+project/mongo/data/
+
+# caches & deps
+project/**/__pycache__/
+project/**/node_modules/
